@@ -9,6 +9,9 @@
 #include <set>
 #include <map>
 
+const int DISK_SPACE = 70000000;
+const int SPACE_NEEDED = 30000000;
+
 std::string getPathFromVec(std::vector<std::string> pathVec, std::string file){
     std::string path = "";
     for(std::string s: pathVec){
@@ -59,8 +62,10 @@ int main(int argc, char** argv){
         }
     }
     std::map<std::string, int>::iterator it;
-    long total = 0;
+    long totalFileSize = 0;
     for(it = fileSizes.begin(); it != fileSizes.end(); it++){
+        totalFileSize += it->second;
+
         std::string filePath = it->first;
         std::istringstream fileISS(filePath);
         std::vector<std::string> directories(std::istream_iterator<std::string>{fileISS},
@@ -82,13 +87,18 @@ int main(int argc, char** argv){
         }
     }
 
+    int spaceAvailable = DISK_SPACE - totalFileSize;
+    int amountNeededToDelete = SPACE_NEEDED - spaceAvailable;
+    int currChosenSize = DISK_SPACE;
+    //Need to find the smallest directory that's at least as big as the amountNeededToDelete
     for(it = dirSizes.begin(); it != dirSizes.end(); it++){
-        if(it->second <= 100000){
-            total += it->second;
+        if(it->second >= amountNeededToDelete && it->second <=currChosenSize){
+            currChosenSize = it->second;
         }
     }
-    
-    std::cout << total << std::endl;
+
+    std::cout << currChosenSize <<std::endl;
+
     return 0;
 
 }
