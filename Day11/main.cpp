@@ -68,10 +68,12 @@ int main(int argc, char** argv){
     // Monkeys go in order, and test each item they have
     for(auto m: monkeys) {
         for(auto item: m->items){
-            // When a monkey inspects an item, worry level is divided by 3
+            // When a monkey inspects an item, the operation is performed
+            item = m->operation(item);
+            // When a monkey finishes inspecting an item, worry level is divided by 3
             item = item / 3;
-            // TODO: Consider using a queue since each monkey will always throw all of its items
-            // going in order 
+            // TODO: Consider using a queue for the items 
+            // since each monkey will always throw all of its items going in FCFS order 
 
         }
     }
