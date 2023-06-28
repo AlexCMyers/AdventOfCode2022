@@ -3,14 +3,17 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <queue>
+#include <algorithm>
 
 /* Day 10: Monkey in the middle */
 struct Monkey {
-    std::vector<int> items;
+    std::queue<int> items;
     std::function<int(int)> operation;
     int test;
     int trueMonkeyId;
     int falseMonkeyId;
+    int itemsInspected;
 };
 
 std::function<int(int)> parseOperation(char op, std::string operand);
@@ -44,9 +47,10 @@ int main(int argc, char** argv){
         /* Starting items: */
         inputFile >> input >> input;
         while(inputFile >> item){
-            monkeys.at(ind)->items.push_back(item);
+            monkeys.at(ind)->items.push(item);
             inputFile >> com;
         }
+        monkeys.at(ind)->itemsInspected = 0;
         /* Operation: new = old */
         inputFile >> input >> input >> input >> input;
         // the equations are always `old _ ()` where _ is either * or + and
@@ -64,19 +68,37 @@ int main(int argc, char** argv){
         inputFile >> input >> input >> input >> input >> input >> tempNum;
         monkeys.at(ind)->falseMonkeyId = tempNum;
     }
-
+    int currItem;
+    // Instructions say to test for 20 rounds
     // Monkeys go in order, and test each item they have
-    for(auto m: monkeys) {
-        for(auto item: m->items){
-            // When a monkey inspects an item, the operation is performed
-            item = m->operation(item);
-            // When a monkey finishes inspecting an item, worry level is divided by 3
-            item = item / 3;
-            // TODO: Consider using a queue for the items 
-            // since each monkey will always throw all of its items going in FCFS order 
+    for(int i = 0; i < 20; i++){
+        for(auto m: monkeys) {
+            while(!m->items.empty()){
+                currItem = m->items.front();
+                // When a monkey inspects an item, the operation is performed
+                currItem = m->operation(currItem);
+                m->itemsInspected++;
+                // When a monkey finishes inspecting an item, worry level is divided by 3
+                currItem = currItem / 3;
+                // test the item and toss it to the corresponding monkey
+                if(item % m->test == 0)
+                    monkeys.at(m->trueMonkeyId)->items.push(currItem);
+                else
+                    monkeys.at(m->falseMonkeyId)->items.push(currItem);
+                m->items.pop();
 
+            }
         }
     }
+
+    // calculating level of monkey business -> find 2 monkeys who inspected the most items
+    // and multiply their inspectedItems counts together
+    std::sort(monkeys.begin(), monkeys.end(), [] (Monkey* rhs, Monkey* lhs) {
+        return rhs->itemsInspected > lhs->itemsInspected;});
+    
+    int monkeyBusiness = monkeys.at(0)->itemsInspected * monkeys.at(1)->itemsInspected;
+    std::cout << monkeyBusiness << std::endl;
+
    
     return 0;
 }
@@ -94,6 +116,7 @@ std::function<int(int)> parseOperation(char op, std::string operand){
                 std::cout << "error" << std::endl;
         }
     } else {
+        std::cout << "operand: " << operand << std::endl;
         int num = stoi(operand);
         switch(op){
             case '*':
