@@ -51,6 +51,7 @@ int main(int argc, char** argv){
             inputFile >> com;
         }
         monkeys.at(ind)->itemsInspected = 0;
+        inputFile.clear();
         /* Operation: new = old */
         inputFile >> input >> input >> input >> input;
         // the equations are always `old _ ()` where _ is either * or + and
@@ -116,7 +117,6 @@ std::function<int(int)> parseOperation(char op, std::string operand){
                 std::cout << "error" << std::endl;
         }
     } else {
-        std::cout << "operand: " << operand << std::endl;
         int num = stoi(operand);
         switch(op){
             case '*':
