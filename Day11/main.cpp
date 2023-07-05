@@ -69,10 +69,11 @@ int main(int argc, char** argv){
         inputFile >> input >> input >> input >> input >> input >> tempNum;
         monkeys.at(ind)->falseMonkeyId = tempNum;
     }
+
     int currItem;
     // Instructions say to test for 20 rounds
     // Monkeys go in order, and test each item they have
-    for(int i = 0; i < 20; i++){
+    for(int i = 0; i < 1; i++){
         for(auto m: monkeys) {
             while(!m->items.empty()){
                 currItem = m->items.front();
@@ -90,8 +91,19 @@ int main(int argc, char** argv){
 
             }
         }
+        std::cout << "after round " << i + 1 << ", the monkeys are holding these items:" << std::endl;
+        int k = 0;
+        for(auto m: monkeys){
+            std::cout << "monkey " << k << ": ";
+            for(int n = 0; n < m->items.size(); n++) {
+                int thing = m->items.front();
+                std::cout << thing << ", ";
+                m->items.pop();
+                m->items.push(thing);
+            }
+            std::cout << std::endl;
+        }
     }
-
     // calculating level of monkey business -> find 2 monkeys who inspected the most items
     // and multiply their inspectedItems counts together
     std::sort(monkeys.begin(), monkeys.end(), [] (Monkey* rhs, Monkey* lhs) {
