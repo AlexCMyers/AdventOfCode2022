@@ -70,25 +70,44 @@ int main(int argc, char** argv){
         monkeys.at(ind)->falseMonkeyId = tempNum;
     }
 
+    /* Part 2 challenge */
+    // Must find a new way to keep worry levels "manageable" (not too large to overflow)
+    // While still being sure to pass to the appropriate monkey for the sake of knowing how much
+    // "monkey business" there is
+    // Essentially, must maintain the worry level's divisibility by all the monkeys' tests
+    
+    // if num % x == y, then (num + nx) % x == y
+    // could multiple all the test nums together and if the worry level exceeds that product,
+    // subtract it
+    // And subtracting a number over an over until your number is too small to subtract from is the
+    // same as doing modulo
+
+    int testProduct = 1;
+    for(auto m: monkeys)
+        testProduct = testProduct * m->test;
     int currItem;
-    // Instructions say to test for 20 rounds
+    // Instructions for part 1 say to test for 20 rounds
+    // Part 2 has 10000 rounds
     // Monkeys go in order, and test each item they have
-    for(int i = 0; i < 20; i++){
+    for(int i = 0; i < 10000; i++){
         for(auto m: monkeys) {
             while(!m->items.empty()){
                 currItem = m->items.front();
                 // When a monkey inspects an item, the operation is performed
                 currItem = m->operation(currItem);
                 m->itemsInspected++;
-                // When a monkey finishes inspecting an item, worry level is divided by 3
-                currItem = currItem / 3;
+                // In part 1, When a monkey finishes inspecting an item, worry level is divided by 3
+                // In part 2, that stops happening
+                // currItem = currItem / 3;
+
+                currItem = currItem % testProduct;
+
                 // test the item and toss it to the corresponding monkey
                 if(currItem % m->test == 0)
                     monkeys.at(m->trueMonkeyId)->items.push(currItem);
                 else
                     monkeys.at(m->falseMonkeyId)->items.push(currItem);
                 m->items.pop();
-
             }
         }
     }
@@ -99,8 +118,6 @@ int main(int argc, char** argv){
     
     int monkeyBusiness = monkeys.at(0)->itemsInspected * monkeys.at(1)->itemsInspected;
     std::cout << monkeyBusiness << std::endl;
-
-   
     return 0;
 }
 
