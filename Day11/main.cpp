@@ -8,15 +8,15 @@
 
 /* Day 10: Monkey in the middle */
 struct Monkey {
-    std::queue<int> items;
-    std::function<int(int)> operation;
+    std::queue<long> items;
+    std::function<long(long)> operation;
     int test;
     int trueMonkeyId;
     int falseMonkeyId;
     int itemsInspected;
 };
 
-std::function<int(int)> parseOperation(char op, std::string operand);
+std::function<long(long)> parseOperation(char op, std::string operand);
 
 int main(int argc, char** argv){
     std::ifstream inputFile;
@@ -33,9 +33,9 @@ int main(int argc, char** argv){
      * If false: throw to monkey 3 */
 
     std::string input = "";
-    int item = 0;
+    long item = 0;
     int ind = 0;
-    int tempNum = 0;
+    long tempNum = 0;
     char col, com;
     char op;
     std::string operand;
@@ -68,6 +68,7 @@ int main(int argc, char** argv){
         /* If false: throw to monkey 3 */
         inputFile >> input >> input >> input >> input >> input >> tempNum;
         monkeys.at(ind)->falseMonkeyId = tempNum;
+        std::cout << "read a monkey" << std::endl;
     }
 
     /* Part 2 challenge */
@@ -82,14 +83,14 @@ int main(int argc, char** argv){
     // And subtracting a number over an over until your number is too small to subtract from is the
     // same as doing modulo
 
-    int testProduct = 1;
+    long testProduct = 1;
     for(auto m: monkeys)
         testProduct = testProduct * m->test;
-    int currItem;
+    long currItem;
     // Instructions for part 1 say to test for 20 rounds
     // Part 2 has 10000 rounds
     // Monkeys go in order, and test each item they have
-    for(int i = 0; i < 10000; i++){
+    for(long i = 0; i < 10000; i++){
         for(auto m: monkeys) {
             while(!m->items.empty()){
                 currItem = m->items.front();
@@ -97,10 +98,16 @@ int main(int argc, char** argv){
                 currItem = m->operation(currItem);
                 m->itemsInspected++;
                 // In part 1, When a monkey finishes inspecting an item, worry level is divided by 3
-                // In part 2, that stops happening
+                // In part 2, that stops happening, but can't allow for overflows while still
+                // having valid tests
                 // currItem = currItem / 3;
 
-                currItem = currItem % testProduct;
+                // if the currentItem is a multiple of the test it will be modded by, then
+                // currentItem % test will be 0
+                // testProduct is a multiple of all potential tests
+                // if X % Y == 0, then (X - iY) % Y == 0
+                while(currItem > testProduct)
+                    currItem -= testProduct;
 
                 // test the item and toss it to the corresponding monkey
                 if(currItem % m->test == 0)
@@ -116,31 +123,33 @@ int main(int argc, char** argv){
     std::sort(monkeys.begin(), monkeys.end(), [] (Monkey* rhs, Monkey* lhs) {
         return rhs->itemsInspected > lhs->itemsInspected;});
     
-    int monkeyBusiness = monkeys.at(0)->itemsInspected * monkeys.at(1)->itemsInspected;
-    std::cout << monkeyBusiness << std::endl;
+    for(auto m: monkeys)
+        std::cout << m->itemsInspected << std::endl;
+    // long monkeyBusiness = monkeys.at(0)->itemsInspected * monkeys.at(1)->itemsInspected;
+    // std::cout << monkeyBusiness << std::endl;
     return 0;
 }
 
-std::function<int(int)> parseOperation(char op, std::string operand){
+std::function<long(long)> parseOperation(char op, std::string operand){
     if(operand == "old"){
         switch(op){
             case '*':
-                return [](int x) { return x * x; };
+                return [](long x) { return x * x; };
                 break;
             case '+':
-                return [](int x) { return x + x; };
+                return [](long x) { return x + x; };
                 break;
             default:
                 std::cout << "error" << std::endl;
         }
     } else {
-        int num = stoi(operand);
+        long num = stoi(operand);
         switch(op){
             case '*':
-                return [num](int x) { return x * num; };
+                return [num](long x) { return x * num; };
                 break;
             case '+':
-                return [num](int x) { return x + num; };
+                return [num](long x) { return x + num; };
                 break;
             default:
                 std::cout << "error" << std::endl;
